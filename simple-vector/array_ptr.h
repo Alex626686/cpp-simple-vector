@@ -19,6 +19,11 @@ public:
         raw_ptr_ = raw_ptr;
     }
 
+    explicit ArrayPtr(ArrayPtr<Type>&& other) noexcept {//А почему без этого конструктора и оператора все работало и прошло проверку?
+        raw_ptr_ = move(other.raw_ptr_);
+        other.raw_ptr_ = nullptr;
+    }
+
     // Запрещаем копирование
     ArrayPtr(const ArrayPtr&) = delete;
 
@@ -28,6 +33,12 @@ public:
 
     // Запрещаем присваивание
     ArrayPtr& operator=(const ArrayPtr&) = delete;
+
+    ArrayPtr& operator=(ArrayPtr<Type>&& other) {
+        if (&this != &other) {      //Надеюсь это верно?
+            std::swap(raw_ptr_, other.raw_ptr_);
+        }
+    }
 
     // Прекращает владением массивом в памяти, возвращает значение адреса массива
     // После вызова метода указатель на массив должен обнулиться
@@ -59,9 +70,7 @@ public:
 
     // Обменивается значениям указателя на массив с объектом other
     void swap(ArrayPtr& other) noexcept {
-        Type* tmp = raw_ptr_;
-        raw_ptr_ = other.raw_ptr_;
-        other.raw_ptr_ = tmp;
+        std::swap(raw_ptr_, other.raw_ptr_);
     }
 
 private:
